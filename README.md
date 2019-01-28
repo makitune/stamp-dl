@@ -9,7 +9,7 @@ LINE STORE から LINE スタンプの画像(.png)をダウンロードするた
 ターミナルで ↓ を実行 (どこからでも`stamp-dl`コマンドが使えるようになるはず...)
 
 ```console
-curl -o stamp-dl https://gist.githubusercontent.com/makitune/87f53149bbfec5ef206fb31ad8ce8e86/raw/c5099554d8200d5e835f25764747639c28be8dc9/stamp-dl_darwin_amd64; chmod 755 stamp-dl; mv stamp-dl /usr/local/bin/
+curl -o stamp-dl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.0.0/stamp-dl_v0.0.0_darwin_amd64'; chmod 755 stamp-dl; mv stamp-dl /usr/local/bin/
 ```
 
 実行すると`/usr/local/bin`にバイナリが配置される。(削除する時はココを探して！)
