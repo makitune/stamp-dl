@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func storeFile(s *LineStamp, dir string) error {
+func storeStamp(s *LineStamp, dir string) error {
 	info, err := os.Stat(dir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
 		return errors.New(dir + " というディレクトリは存在しません。")
