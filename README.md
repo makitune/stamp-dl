@@ -12,7 +12,8 @@ LINE STORE から LINE スタンプの画像(.png)をダウンロードするた
 curl -o stamp-dl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.0.0/stamp-dl_v0.0.0_darwin_amd64'; chmod 755 stamp-dl; sudo mv stamp-dl /usr/local/bin/
 ```
 
-実行すると`/usr/local/bin`にバイナリが配置される。(削除する時はココを探して！)
+実行するとパスワードを聞かれるので、Mac にログインするときに使うパスワードを入力する。  
+成功すると`/usr/local/bin`にバイナリが配置される。(削除する時はココを探して！)
 
 ## Usage
 
