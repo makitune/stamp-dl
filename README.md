@@ -9,7 +9,7 @@ LINE STORE から LINE スタンプの画像(.png)をダウンロードするた
 ターミナルで ↓ を実行 (どこからでも`stamp-dl`コマンドが使えるようになるはず...)
 
 ```console
-curl -o stamp-dl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.0.0/stamp-dl_v0.0.0_darwin_amd64'; chmod 755 stamp-dl; sudo mv stamp-dl /usr/local/bin/
+curl -o stamp-dl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.0.1/stamp-dl_v0.0.1_darwin_amd64'; chmod 755 stamp-dl; sudo mv stamp-dl /usr/local/bin/
 ```
 
 実行するとパスワードを聞かれるので、Mac にログインするときに使うパスワードを入力する。  
