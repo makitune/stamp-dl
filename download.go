@@ -38,9 +38,9 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, "mdCMN08Ttl") {
+		if strings.Contains(line, "mdCMN38Item01Ttl") {
 			start := strings.Index(line, ">")
-			end := strings.Index(line, "</h3>")
+			end := strings.Index(line, "</p>")
 			title = line[start+1 : end]
 		}
 
