@@ -2,14 +2,11 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"errors"
 	"html"
 	"image"
 	"net/http"
 	"strings"
-
-	"golang.org/x/sync/errgroup"
 )
 
 func fetchStamps(urls []string) ([]*LineStamp, error) {
@@ -41,9 +38,9 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, "mdCMN38Item01Ttl") {
+		if strings.Contains(line, "mdCMN08Ttl") {
 			start := strings.Index(line, ">")
-			end := strings.Index(line, "</p>")
+			end := strings.Index(line, "</h3>")
 			title = line[start+1 : end]
 		}
 
@@ -58,34 +55,20 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 		title:  html.UnescapeString(title),
 		images: []image.Image{},
 	}
-
-	eg, ctx := errgroup.WithContext(context.TODO())
 	for _, u := range urls {
-		eg.Go(func() error {
-			i, err := download(ctx, u)
-			if err != nil {
-				return err
-			}
-			s.images = append(s.images, i)
-			return nil
-		})
+		i, err := download(u)
+		if err != nil {
+			return nil, err
+		}
+
+		s.images = append(s.images, i)
 	}
 
-	if err := eg.Wait(); err != nil {
-		return nil, err
-	}
 	return &s, nil
 }
 
-func download(ctx context.Context, urlString string) (image.Image, error) {
-	req, err := http.NewRequest(http.MethodGet, urlString, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	req = req.WithContext(ctx)
-	client := http.DefaultClient
-	resp, err := client.Do(req)
+func download(urlString string) (image.Image, error) {
+	resp, err := http.Get(urlString)
 	if err != nil {
 		return nil, err
 	}
