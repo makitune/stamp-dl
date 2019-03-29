@@ -60,19 +60,29 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 	}
 
 	eg, ctx := errgroup.WithContext(context.TODO())
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
 	for _, u := range urls {
 		u := u
 		eg.Go(func() error {
-			i, err := download(ctx, u)
-			if err != nil {
-				return err
+			select {
+			case <-ctx.Done():
+				return nil
+
+			default:
+				i, err := download(ctx, u)
+				if err != nil {
+					return err
+				}
+				s.images = append(s.images, i)
+				return nil
 			}
-			s.images = append(s.images, i)
-			return nil
 		})
 	}
 
 	if err := eg.Wait(); err != nil {
+		cancel()
 		return nil, err
 	}
 	return &s, nil
