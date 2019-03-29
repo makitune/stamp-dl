@@ -61,6 +61,7 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 
 	eg, ctx := errgroup.WithContext(context.TODO())
 	for _, u := range urls {
+		u := u
 		eg.Go(func() error {
 			i, err := download(ctx, u)
 			if err != nil {
