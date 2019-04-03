@@ -66,18 +66,13 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 	for _, u := range urls {
 		u := u
 		eg.Go(func() error {
-			select {
-			case <-ctx.Done():
-				return nil
-
-			default:
-				i, err := download(ctx, u)
-				if err != nil {
-					return err
-				}
-				s.images = append(s.images, i)
-				return nil
+			i, err := download(ctx, u)
+			if err != nil {
+				return err
 			}
+
+			s.images = append(s.images, i)
+			return nil
 		})
 	}
 
