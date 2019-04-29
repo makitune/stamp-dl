@@ -41,7 +41,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	ss, err := fetchStamps(args)
+	ss, err := FetchStamps(args)
 	if err != nil {
 		fatalln(err)
 	}

@@ -48,20 +48,33 @@ type lineDataPreviews struct {
 	DataPreviews []*lineDataPreview
 }
 
-func fetchStamps(urls []string) ([]*LineStamp, error) {
-	var stamps []*LineStamp
+// FetchStamps is a function that fetches Stamps from input url
+func FetchStamps(urls []string) ([]*LineStamp, error) {
+	var stampData []*lineDataPreviews
 	for _, u := range urls {
-		s, err := fetchStamp(u)
+		sd, err := fetchStampData(u)
 		if err != nil {
 			return nil, err
 		}
 
-		stamps = append(stamps, s)
+		stampData = append(stampData, sd)
 	}
+
+	var stamps []*LineStamp
+	for _, dps := range stampData {
+		stamp, err := downloadStamp(dps)
+
+		if err != nil {
+			return nil, err
+		}
+
+		stamps = append(stamps, stamp)
+	}
+
 	return stamps, nil
 }
 
-func fetchStamp(urlString string) (*LineStamp, error) {
+func fetchStampData(urlString string) (*lineDataPreviews, error) {
 	if !IsLineStoreURL(urlString) {
 		return nil, errors.New(urlString + " はLINEスタンプページのURLではありません。")
 	}
@@ -97,17 +110,19 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 		}
 	}
 
-	ldp := &lineDataPreviews{
+	return &lineDataPreviews{
 		Title:        html.UnescapeString(title),
 		DataPreviews: dataPreviews[1:],
-	}
+	}, nil
+}
 
+func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	var stickers []LineSticker
 	eg, ctx := errgroup.WithContext(context.TODO())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for _, dp := range ldp.DataPreviews {
+	for _, dp := range dps.DataPreviews {
 		id := dp.ID
 		u, err := stampTypeURL(dp)
 		if err != nil {
@@ -115,7 +130,7 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 		}
 
 		eg.Go(func() error {
-			i, err := download(ctx, u.String())
+			i, err := download(ctx, u)
 			if err != nil {
 				return err
 			}
@@ -134,13 +149,13 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 	}
 
 	return &LineStamp{
-		Title:    ldp.Title,
+		Title:    dps.Title,
 		Stickers: stickers,
 	}, nil
 }
 
-func download(ctx context.Context, urlString string) (image.Image, error) {
-	req, err := http.NewRequest(http.MethodGet, urlString, nil)
+func download(ctx context.Context, u *url.URL) (image.Image, error) {
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
