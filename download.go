@@ -12,6 +12,17 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// lineDataPreview is a object relational mapping structure
+type lineDataPreview struct {
+	Type              string `json:"type"`
+	ID                string `json:"id"`
+	StaticURL         string `json:"staticUrl"`
+	FallbackStaticURL string `json:"fallbackStaticUrl"`
+	AnimationURL      string `json:"animationUrl"`
+	PopupURL          string `json:"popupUrl"`
+	SoundURL          string `json:"soundUrl"`
+}
+
 func fetchStamps(urls []string) ([]*LineStamp, error) {
 	var stamps []*LineStamp
 	for _, u := range urls {
