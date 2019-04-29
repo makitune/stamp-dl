@@ -44,8 +44,8 @@ func stampTypeURL(ldp *lineDataPreview) (*url.URL, error) {
 
 // lineDataPreviews is a collection object for lineDataPreview
 type lineDataPreviews struct {
-	Title        string
-	DataPreviews []*lineDataPreview
+	title        string
+	dataPreviews []*lineDataPreview
 }
 
 // FetchStamps is a function that fetches Stamps from input url
@@ -111,8 +111,8 @@ func fetchStampData(urlString string) (*lineDataPreviews, error) {
 	}
 
 	return &lineDataPreviews{
-		Title:        html.UnescapeString(title),
-		DataPreviews: dataPreviews[1:],
+		title:        html.UnescapeString(title),
+		dataPreviews: dataPreviews[1:],
 	}, nil
 }
 
@@ -122,7 +122,7 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for _, dp := range dps.DataPreviews {
+	for _, dp := range dps.dataPreviews {
 		id := dp.ID
 		u, err := stampTypeURL(dp)
 		if err != nil {
@@ -149,7 +149,7 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	}
 
 	return &LineStamp{
-		Title:    dps.Title,
+		Title:    dps.title,
 		Stickers: stickers,
 	}, nil
 }
