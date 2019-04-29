@@ -41,6 +41,12 @@ func stampTypeURL(ldp *lineDataPreview) (*url.URL, error) {
 	}
 }
 
+// lineDataPreviews is a collection object for lineDataPreview
+type lineDataPreviews struct {
+	Title        string
+	DataPreviews []*lineDataPreview
+}
+
 func fetchStamps(urls []string) ([]*LineStamp, error) {
 	var stamps []*LineStamp
 	for _, u := range urls {
