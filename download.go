@@ -7,6 +7,7 @@ import (
 	"html"
 	"image"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"golang.org/x/sync/errgroup"
@@ -21,6 +22,23 @@ type lineDataPreview struct {
 	AnimationURL      string `json:"animationUrl"`
 	PopupURL          string `json:"popupUrl"`
 	SoundURL          string `json:"soundUrl"`
+}
+
+func stampTypeURL(ldp *lineDataPreview) (*url.URL, error) {
+	switch ldp.Type {
+	case "static":
+		return url.Parse(ldp.StaticURL)
+	case "animation":
+		return url.Parse(ldp.AnimationURL)
+	case "popup":
+		return url.Parse(ldp.PopupURL)
+	case "sound":
+		return url.Parse(ldp.SoundURL)
+	case "animation_sound":
+		return nil, errors.New("ボイス・サウンド付きスタンプには対応していません")
+	default:
+		return nil, errors.New("対応していません")
+	}
 }
 
 func fetchStamps(urls []string) ([]*LineStamp, error) {
