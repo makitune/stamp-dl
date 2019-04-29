@@ -52,7 +52,7 @@ func main() {
 	}
 
 	for _, s := range ss {
-		err = storeStamp(s, absPath)
+		err = StoreStamp(s, absPath)
 		if err != nil {
 			fatalln(err)
 		}
