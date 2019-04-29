@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"errors"
 	"html"
 	"image"
@@ -71,7 +72,8 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 	}
 
 	var title string
-	var urls []string
+	var dataPreviews []*lineDataPreview
+
 	defer resp.Body.Close()
 	scanner := bufio.NewScanner(resp.Body)
 	for scanner.Scan() {
@@ -82,31 +84,46 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 			title = line[start+1 : end]
 		}
 
-		if strings.Contains(line, "style=\"background-image") {
-			start := strings.Index(line, "(")
-			end := strings.Index(line, ";")
-			urls = append(urls, line[start+1:end])
+		if strings.Contains(line, "data-preview") {
+			start := strings.Index(line, "{")
+			end := strings.Index(line, "}")
+			j := html.UnescapeString(line[start : end+1])
+
+			pd := new(lineDataPreview)
+			if err := json.Unmarshal([]byte(j), pd); err != nil {
+				return nil, err
+			}
+			dataPreviews = append(dataPreviews, pd)
 		}
 	}
 
-	s := LineStamp{
-		title:  html.UnescapeString(title),
-		images: []image.Image{},
+	ldp := &lineDataPreviews{
+		Title:        html.UnescapeString(title),
+		DataPreviews: dataPreviews[1:],
 	}
 
+	var stickers []LineSticker
 	eg, ctx := errgroup.WithContext(context.TODO())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	for _, u := range urls {
-		u := u
+	for _, dp := range ldp.DataPreviews {
+		id := dp.ID
+		u, err := stampTypeURL(dp)
+		if err != nil {
+			return nil, err
+		}
+
 		eg.Go(func() error {
-			i, err := download(ctx, u)
+			i, err := download(ctx, u.String())
 			if err != nil {
 				return err
 			}
 
-			s.images = append(s.images, i)
+			stickers = append(stickers, LineSticker{
+				ID:    id,
+				Image: i,
+			})
 			return nil
 		})
 	}
@@ -115,7 +132,11 @@ func fetchStamp(urlString string) (*LineStamp, error) {
 		cancel()
 		return nil, err
 	}
-	return &s, nil
+
+	return &LineStamp{
+		Title:    ldp.Title,
+		Stickers: stickers,
+	}, nil
 }
 
 func download(ctx context.Context, urlString string) (image.Image, error) {

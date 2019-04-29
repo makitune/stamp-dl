@@ -16,13 +16,14 @@ func storeStamp(s *LineStamp, dir string) error {
 		return errors.New(dir + " というディレクトリは存在しません。")
 	}
 
-	outDir := filepath.Join(dir, s.title)
+	outDir := filepath.Join(dir, s.Title)
 	info, err = os.Stat(outDir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
 		_ = os.Mkdir(outDir, 0755)
 	}
 
-	for i, img := range s.filledBackgroundImage(color.RGBA{255, 255, 255, 255}) {
+	for i, sticker := range s.Stickers {
+		img := sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255})
 		name := strconv.Itoa(i) + ".png"
 		absName := filepath.Join(outDir, name)
 		err := writeFile(img, absName)
