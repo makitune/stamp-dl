@@ -187,7 +187,7 @@ func download(ctx context.Context, ldp *lineDataPreview) (*LineSticker, error) {
 
 	return &LineSticker{
 		ID: ldp.ID,
-		Image: StickerImage{
+		Image: LineStickerImage{
 			Type: lst,
 			raw:  img,
 		},

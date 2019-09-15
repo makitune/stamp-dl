@@ -8,7 +8,7 @@ import (
 	"github.com/kettek/apng"
 )
 
-func fillImageBackground(si StickerImage, clr color.Color) StickerImage {
+func fillImageBackground(si LineStickerImage, clr color.Color) LineStickerImage {
 	img := si.raw.(image.Image)
 	b := img.Bounds()
 
@@ -20,13 +20,13 @@ func fillImageBackground(si StickerImage, clr color.Color) StickerImage {
 	}
 
 	draw.Draw(out, b, img, image.Pt(0, 0), draw.Over)
-	return StickerImage{
+	return LineStickerImage{
 		Type: si.Type,
 		raw:  out,
 	}
 }
 
-func fillAPNGBackground(si StickerImage, clr color.Color) StickerImage {
+func fillAPNGBackground(si LineStickerImage, clr color.Color) LineStickerImage {
 	imgs := si.raw.(apng.APNG)
 	frames := []apng.Frame{}
 	for _, frame := range imgs.Frames {
@@ -43,7 +43,7 @@ func fillAPNGBackground(si StickerImage, clr color.Color) StickerImage {
 		frames = append(frames, apng.Frame{Image: out})
 	}
 
-	return StickerImage{
+	return LineStickerImage{
 		Type: si.Type,
 		raw: apng.APNG{
 			Frames:    frames,

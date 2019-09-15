@@ -28,10 +28,10 @@ const (
 // LineSticker is an object for a Line stamp image
 type LineSticker struct {
 	ID    string
-	Image StickerImage
+	Image LineStickerImage
 }
 
-type StickerImage struct {
+type LineStickerImage struct {
 	Type LineStickerType
 	raw  interface{}
 }
@@ -42,7 +42,7 @@ func (s *LineSticker) StoreName() string {
 }
 
 // FilledBackgroundImage is the sticker image for saving
-func (s *LineSticker) FilledBackgroundImage(clr color.Color) (*StickerImage, error) {
+func (s *LineSticker) FilledBackgroundImage(clr color.Color) (*LineStickerImage, error) {
 	switch s.Image.Type {
 	case LineStickerStatic, LineStickerCustom:
 		si := fillImageBackground(s.Image, color.RGBA{255, 255, 255, 255})
@@ -55,7 +55,7 @@ func (s *LineSticker) FilledBackgroundImage(clr color.Color) (*StickerImage, err
 	return nil, errors.New("対応していません")
 }
 
-func (si *StickerImage) Encode(w io.Writer) error {
+func (si *LineStickerImage) Encode(w io.Writer) error {
 	switch si.Type {
 	case LineStickerStatic, LineStickerCustom:
 		return png.Encode(w, si.raw.(image.Image))
