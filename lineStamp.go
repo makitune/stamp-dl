@@ -45,10 +45,10 @@ func (s *LineSticker) StoreName() string {
 func (s *LineSticker) FilledBackgroundImage(clr color.Color) (StickerImage, error) {
 	switch s.Image.Type {
 	case LineStickerStatic, LineStickerCustom:
-		si := fillImageBackground(s.Image, color.RGBA{255, 255, 255, 255})
+		si := s.Image.fillPNGBackground(color.RGBA{255, 255, 255, 255})
 		return &si, nil
 	case LineStickerAnimation:
-		si := fillAPNGBackground(s.Image, color.RGBA{255, 255, 255, 255})
+		si := s.Image.fillAPNGBackground(color.RGBA{255, 255, 255, 255})
 		return &si, nil
 	}
 
