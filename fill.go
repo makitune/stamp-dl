@@ -10,16 +10,7 @@ import (
 
 func (si *LineStickerImage) fillPNGBackground(clr color.Color) LineStickerImage {
 	img := si.raw.(image.Image)
-	b := img.Bounds()
-
-	out := image.NewRGBA(b)
-	for x := b.Min.X; x < b.Max.X; x++ {
-		for y := b.Min.Y; y < b.Max.Y; y++ {
-			out.Set(x, y, clr)
-		}
-	}
-
-	draw.Draw(out, b, img, image.Pt(0, 0), draw.Over)
+	out := filledImage(img, clr)
 	return LineStickerImage{
 		Type: si.Type,
 		raw:  out,
@@ -30,16 +21,7 @@ func (si *LineStickerImage) fillAPNGBackground(clr color.Color) LineStickerImage
 	imgs := si.raw.(apng.APNG)
 	frames := []apng.Frame{}
 	for _, frame := range imgs.Frames {
-		b := frame.Image.Bounds()
-
-		out := image.NewRGBA(b)
-		for x := b.Min.X; x < b.Max.X; x++ {
-			for y := b.Min.Y; y < b.Max.Y; y++ {
-				out.Set(x, y, clr)
-			}
-		}
-
-		draw.Draw(out, b, frame.Image, image.Pt(0, 0), draw.Over)
+		out := filledImage(frame.Image, clr)
 		frames = append(frames, apng.Frame{Image: out})
 	}
 
@@ -50,4 +32,18 @@ func (si *LineStickerImage) fillAPNGBackground(clr color.Color) LineStickerImage
 			LoopCount: 0,
 		},
 	}
+}
+
+func filledImage(img image.Image, clr color.Color) image.Image {
+	b := img.Bounds()
+
+	out := image.NewRGBA(b)
+	for x := b.Min.X; x < b.Max.X; x++ {
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			out.Set(x, y, clr)
+		}
+	}
+
+	draw.Draw(out, b, img, image.Pt(0, 0), draw.Over)
+	return out
 }
