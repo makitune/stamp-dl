@@ -26,20 +26,24 @@ type lineDataPreview struct {
 }
 
 func stampTypeURL(ldp *lineDataPreview) (*url.URL, error) {
-	switch ldp.Type {
-	case "static":
+	switch lineStickerType(ldp) {
+	case LineStickerStatic:
 		return url.Parse(ldp.StaticURL)
-	case "animation":
+	case LineStickerAnimation:
 		return url.Parse(ldp.AnimationURL)
-	case "popup":
-		return url.Parse(ldp.PopupURL)
-	case "sound":
-		return url.Parse(ldp.SoundURL)
-	case "animation_sound":
+	case LineStickerPopup:
+		return nil, errors.New("ポップアップスタンプには対応していません")
+	case LineStickerSound:
 		return nil, errors.New("ボイス・サウンド付きスタンプには対応していません")
-	default:
+	case LineStickerAnimationSound:
+		return nil, errors.New("ボイス・サウンド付きスタンプには対応していません")
+	case LineStickerCustom:
+		return url.Parse(ldp.StaticURL)
+	case LineStickerUnkown:
 		return nil, errors.New("対応していません")
 	}
+
+	return nil, errors.New("製作者に連絡してください")
 }
 
 // lineDataPreviews is a collection object for lineDataPreview
@@ -123,22 +127,15 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	defer cancel()
 
 	for _, dp := range dps.dataPreviews {
-		id := dp.ID
-		u, err := stampTypeURL(dp)
-		if err != nil {
-			return nil, err
-		}
+		d := dp
 
 		eg.Go(func() error {
-			i, err := download(ctx, u)
+			s, err := download(ctx, d)
 			if err != nil {
 				return err
 			}
 
-			stickers = append(stickers, LineSticker{
-				ID:    id,
-				Image: i,
-			})
+			stickers = append(stickers, *s)
 			return nil
 		})
 	}
@@ -154,7 +151,12 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	}, nil
 }
 
-func download(ctx context.Context, u *url.URL) (image.Image, error) {
+func download(ctx context.Context, ldp *lineDataPreview) (*LineSticker, error) {
+	u, err := stampTypeURL(ldp)
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
 		return nil, err
@@ -174,4 +176,23 @@ func download(ctx context.Context, u *url.URL) (image.Image, error) {
 	}
 
 	return img, nil
+}
+
+func lineStickerType(ldp *lineDataPreview) LineStickerType {
+	switch ldp.Type {
+	case "static":
+		return LineStickerStatic
+	case "animation":
+		return LineStickerAnimation
+	case "animation_sound":
+		return LineStickerAnimationSound
+	case "popup":
+		return LineStickerPopup
+	case "sound":
+		return LineStickerSound
+	case "name":
+		return LineStickerCustom
+	default:
+		return LineStickerUnkown
+	}
 }

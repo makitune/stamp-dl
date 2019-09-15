@@ -3,10 +3,23 @@ package main
 import (
 	"image"
 	"image/color"
+	"io"
 	"strings"
 )
 
 var lineStore = "https://store.line.me/stickershop"
+
+type LineStickerType int
+
+const (
+	LineStickerStatic LineStickerType = iota
+	LineStickerAnimation
+	LineStickerAnimationSound
+	LineStickerPopup
+	LineStickerSound
+	LineStickerCustom
+	LineStickerUnkown
+)
 
 // LineSticker is an object for a Line stamp image
 type LineSticker struct {
