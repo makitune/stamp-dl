@@ -123,7 +123,7 @@ func fetchStampData(urlString string) (*lineDataPreviews, error) {
 }
 
 func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
-	var stickers []LineSticker
+	var stickers []*LineSticker
 	eg, ctx := errgroup.WithContext(context.TODO())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -137,7 +137,7 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 				return err
 			}
 
-			stickers = append(stickers, *s)
+			stickers = append(stickers, s.(*LineSticker))
 			return nil
 		})
 	}
@@ -153,7 +153,7 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	}, nil
 }
 
-func download(ctx context.Context, ldp *lineDataPreview) (*LineSticker, error) {
+func download(ctx context.Context, ldp *lineDataPreview) (Sticker, error) {
 	u, err := stampTypeURL(ldp)
 	if err != nil {
 		return nil, err

@@ -8,7 +8,7 @@ import (
 )
 
 // StoreStamp is a function that saves an input stamp to input dir
-func StoreStamp(s *LineStamp, dir string) error {
+func (s *LineStamp) Store(dir string) error {
 	info, err := os.Stat(dir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
 		return errors.New(dir + " というディレクトリは存在しません。")
@@ -22,7 +22,7 @@ func StoreStamp(s *LineStamp, dir string) error {
 
 	for _, sticker := range s.Stickers {
 		absName := filepath.Join(outDir, sticker.StoreName())
-		err := writeFile(&sticker, absName)
+		err := writeFile(sticker, absName)
 		if err != nil {
 			return err
 		}
@@ -31,7 +31,7 @@ func StoreStamp(s *LineStamp, dir string) error {
 	return nil
 }
 
-func writeFile(sticker *LineSticker, name string) error {
+func writeFile(sticker Sticker, name string) error {
 	img, err := sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255})
 	if err != nil {
 		return err

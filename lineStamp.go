@@ -42,7 +42,7 @@ func (s *LineSticker) StoreName() string {
 }
 
 // FilledBackgroundImage is the sticker image for saving
-func (s *LineSticker) FilledBackgroundImage(clr color.Color) (*LineStickerImage, error) {
+func (s *LineSticker) FilledBackgroundImage(clr color.Color) (StickerImage, error) {
 	switch s.Image.Type {
 	case LineStickerStatic, LineStickerCustom:
 		si := fillImageBackground(s.Image, color.RGBA{255, 255, 255, 255})
@@ -69,7 +69,7 @@ func (si *LineStickerImage) Encode(w io.Writer) error {
 // LineStamp is a collection object for LineSticker
 type LineStamp struct {
 	Title    string
-	Stickers []LineSticker
+	Stickers []*LineSticker
 }
 
 // IsLineStoreURL returns a boolean indicating whether the string is a LINE STORE stickershop url
