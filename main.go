@@ -41,7 +41,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	ss, err := fetchStamps(args)
+	ss, err := FetchStamps(args)
 	if err != nil {
 		fatalln(err)
 	}
@@ -52,7 +52,7 @@ func main() {
 	}
 
 	for _, s := range ss {
-		err = storeStamp(s, absPath)
+		err = StoreStamp(s, absPath)
 		if err != nil {
 			fatalln(err)
 		}

@@ -8,18 +8,26 @@ import (
 
 var lineStore = "https://store.line.me/stickershop"
 
-// LineStamp is a object
-type LineStamp struct {
-	title  string
-	images []image.Image
+// LineSticker is an object for a Line stamp image
+type LineSticker struct {
+	ID    string
+	Image image.Image
 }
 
-func (s *LineStamp) filledBackgroundImage(clr color.Color) []image.Image {
-	var imgs []image.Image
-	for _, img := range s.images {
-		imgs = append(imgs, fillBackground(img, color.RGBA{255, 255, 255, 255}))
-	}
-	return imgs
+// StoreName is the sticker name for saving
+func (s *LineSticker) StoreName() string {
+	return s.ID + ".png"
+}
+
+// FilledBackgroundImage is the sticker image for saving
+func (s *LineSticker) FilledBackgroundImage(clr color.Color) image.Image {
+	return fillBackground(s.Image, color.RGBA{255, 255, 255, 255})
+}
+
+// LineStamp is a collection object for LineSticker
+type LineStamp struct {
+	Title    string
+	Stickers []LineSticker
 }
 
 // IsLineStoreURL returns a boolean indicating whether the string is a LINE STORE stickershop url

@@ -7,25 +7,24 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
-	"strconv"
 )
 
-func storeStamp(s *LineStamp, dir string) error {
+// StoreStamp is a function that saves an input stamp to input dir
+func StoreStamp(s *LineStamp, dir string) error {
 	info, err := os.Stat(dir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
 		return errors.New(dir + " というディレクトリは存在しません。")
 	}
 
-	outDir := filepath.Join(dir, s.title)
+	outDir := filepath.Join(dir, s.Title)
 	info, err = os.Stat(outDir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
 		_ = os.Mkdir(outDir, 0755)
 	}
 
-	for i, img := range s.filledBackgroundImage(color.RGBA{255, 255, 255, 255}) {
-		name := strconv.Itoa(i) + ".png"
-		absName := filepath.Join(outDir, name)
-		err := writeFile(img, absName)
+	for _, sticker := range s.Stickers {
+		absName := filepath.Join(outDir, sticker.StoreName())
+		err := writeFile(sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255}), absName)
 		if err != nil {
 			return err
 		}
