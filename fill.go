@@ -6,7 +6,8 @@ import (
 	"image/draw"
 )
 
-func fillBackground(img image.Image, clr color.Color) image.Image {
+func fillImageBackground(si StickerImage, clr color.Color) StickerImage {
+	img := si.raw.(image.Image)
 	b := img.Bounds()
 
 	out := image.NewRGBA(b)
@@ -17,5 +18,8 @@ func fillBackground(img image.Image, clr color.Color) image.Image {
 	}
 
 	draw.Draw(out, b, img, image.Pt(0, 0), draw.Over)
-	return out
+	return StickerImage{
+		Type: si.Type,
+		raw:  out,
+	}
 }

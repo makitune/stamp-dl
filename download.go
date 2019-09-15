@@ -170,12 +170,24 @@ func download(ctx context.Context, ldp *lineDataPreview) (*LineSticker, error) {
 	}
 
 	defer resp.Body.Close()
-	img, _, err := image.Decode(resp.Body)
+	lst := lineStickerType(ldp)
+	var img interface{}
+	switch lst {
+	case LineStickerStatic, LineStickerCustom:
+		img, _, err = image.Decode(resp.Body)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
-	return img, nil
+	return &LineSticker{
+		ID: ldp.ID,
+		Image: StickerImage{
+			Type: lst,
+			raw:  img,
+		},
+	}, nil
 }
 
 func lineStickerType(ldp *lineDataPreview) LineStickerType {

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"errors"
 	"image"
 	"image/color"
+	"image/png"
 	"io"
 	"strings"
 )
@@ -24,7 +26,12 @@ const (
 // LineSticker is an object for a Line stamp image
 type LineSticker struct {
 	ID    string
-	Image image.Image
+	Image StickerImage
+}
+
+type StickerImage struct {
+	Type LineStickerType
+	raw  interface{}
 }
 
 // StoreName is the sticker name for saving
@@ -33,8 +40,23 @@ func (s *LineSticker) StoreName() string {
 }
 
 // FilledBackgroundImage is the sticker image for saving
-func (s *LineSticker) FilledBackgroundImage(clr color.Color) image.Image {
-	return fillBackground(s.Image, color.RGBA{255, 255, 255, 255})
+func (s *LineSticker) FilledBackgroundImage(clr color.Color) (*StickerImage, error) {
+	switch s.Image.Type {
+	case LineStickerStatic, LineStickerCustom:
+		si := fillImageBackground(s.Image, color.RGBA{255, 255, 255, 255})
+		return &si, nil
+	}
+
+	return nil, errors.New("対応していません")
+}
+
+func (si *StickerImage) Encode(w io.Writer) error {
+	switch si.Type {
+	case LineStickerStatic, LineStickerCustom:
+		return png.Encode(w, si.raw.(image.Image))
+	}
+
+	return errors.New("対応していません")
 }
 
 // LineStamp is a collection object for LineSticker

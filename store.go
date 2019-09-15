@@ -2,9 +2,7 @@ package main
 
 import (
 	"errors"
-	"image"
 	"image/color"
-	"image/png"
 	"os"
 	"path/filepath"
 )
@@ -24,7 +22,7 @@ func StoreStamp(s *LineStamp, dir string) error {
 
 	for _, sticker := range s.Stickers {
 		absName := filepath.Join(outDir, sticker.StoreName())
-		err := writeFile(sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255}), absName)
+		err := writeFile(&sticker, absName)
 		if err != nil {
 			return err
 		}
@@ -33,7 +31,12 @@ func StoreStamp(s *LineStamp, dir string) error {
 	return nil
 }
 
-func writeFile(img image.Image, name string) error {
+func writeFile(sticker *LineSticker, name string) error {
+	img, err := sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255})
+	if err != nil {
+		return err
+	}
+
 	info, err := os.Stat(name)
 	if err == nil && !info.IsDir() {
 		return errors.New(name + " が既に存在するため中断しました。")
@@ -45,7 +48,7 @@ func writeFile(img image.Image, name string) error {
 	}
 
 	defer f.Close()
-	err = png.Encode(f, img)
+	err = img.Encode(f)
 	if err != nil {
 		return err
 	}
