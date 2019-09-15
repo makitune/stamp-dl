@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/kettek/apng"
+
 	"golang.org/x/sync/errgroup"
 )
 
@@ -175,6 +177,8 @@ func download(ctx context.Context, ldp *lineDataPreview) (*LineSticker, error) {
 	switch lst {
 	case LineStickerStatic, LineStickerCustom:
 		img, _, err = image.Decode(resp.Body)
+	case LineStickerAnimation:
+		img, err = apng.DecodeAll(resp.Body)
 	}
 
 	if err != nil {
