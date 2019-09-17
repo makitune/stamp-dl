@@ -22,7 +22,9 @@ func (si *LineStickerImage) fillAPNGBackground(clr color.Color) LineStickerImage
 	frames := []apng.Frame{}
 	for _, frame := range imgs.Frames {
 		out := filledImage(frame.Image, clr)
-		frames = append(frames, apng.Frame{Image: out})
+		img := frame
+		img.Image = out
+		frames = append(frames, img)
 	}
 
 	return LineStickerImage{
