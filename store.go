@@ -3,11 +3,18 @@ package main
 import (
 	"errors"
 	"image/color"
+	"io"
 	"os"
 	"path/filepath"
 )
 
-// StoreStamp is a function that saves an input stamp to input dir
+// Encoder support writing to a file
+type Encoder interface {
+	Encode(w io.Writer) error
+	StoreName() string
+}
+
+// Store is a function that saves an input stamp to input dir
 func (s *LineStamp) Store(dir string) error {
 	info, err := os.Stat(dir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
