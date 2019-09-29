@@ -69,7 +69,7 @@ func (si *LineStickerImage) Encode(w io.Writer) error {
 // LineStamp is a collection object for LineSticker
 type LineStamp struct {
 	Title    string
-	Stickers []*LineSticker
+	Stickers []Encoder
 }
 
 // IsLineStoreURL returns a boolean indicating whether the string is a LINE STORE stickershop url

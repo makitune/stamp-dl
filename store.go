@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"image/color"
 	"io"
 	"os"
 	"path/filepath"
@@ -38,12 +37,7 @@ func (s *LineStamp) Store(dir string) error {
 	return nil
 }
 
-func writeFile(sticker Sticker, name string) error {
-	img, err := sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255})
-	if err != nil {
-		return err
-	}
-
+func writeFile(encoder Encoder, name string) error {
 	info, err := os.Stat(name)
 	if err == nil && !info.IsDir() {
 		return errors.New(name + " が既に存在するため中断しました。")
@@ -55,7 +49,7 @@ func writeFile(sticker Sticker, name string) error {
 	}
 
 	defer f.Close()
-	err = img.Encode(f)
+	err = encoder.Encode(f)
 	if err != nil {
 		return err
 	}

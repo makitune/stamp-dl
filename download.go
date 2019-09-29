@@ -123,7 +123,7 @@ func fetchStampData(urlString string) (*lineDataPreviews, error) {
 }
 
 func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
-	var stickers []*LineSticker
+	var stickers []Encoder
 	eg, ctx := errgroup.WithContext(context.TODO())
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -137,7 +137,7 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 				return err
 			}
 
-			stickers = append(stickers, s.(*LineSticker))
+			stickers = append(stickers, s)
 			return nil
 		})
 	}
@@ -153,7 +153,7 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	}, nil
 }
 
-func download(ctx context.Context, ldp *lineDataPreview) (Sticker, error) {
+func download(ctx context.Context, ldp *lineDataPreview) (Encoder, error) {
 	u, err := stampTypeURL(ldp)
 	if err != nil {
 		return nil, err
@@ -173,25 +173,31 @@ func download(ctx context.Context, ldp *lineDataPreview) (Sticker, error) {
 
 	defer resp.Body.Close()
 	lst := lineStickerType(ldp)
-	var img interface{}
 	switch lst {
 	case LineStickerStatic, LineStickerCustom:
-		img, _, err = image.Decode(resp.Body)
+		img, _, err := image.Decode(resp.Body)
+		if err != nil {
+			return nil, err
+		}
+
+		return &PNG{
+			name:  ldp.ID,
+			image: img,
+		}, nil
+
 	case LineStickerAnimation:
-		img, err = apng.DecodeAll(resp.Body)
-	}
+		img, err := apng.DecodeAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
 
-	if err != nil {
-		return nil, err
+		return &APNG{
+			name:  ldp.ID,
+			image: img,
+		}, nil
+	default:
+		return nil, errors.New("対応していません")
 	}
-
-	return &LineSticker{
-		ID: ldp.ID,
-		Image: LineStickerImage{
-			Type: lst,
-			raw:  img,
-		},
-	}, nil
 }
 
 func lineStickerType(ldp *lineDataPreview) LineStickerType {
