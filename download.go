@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"html"
 	"image"
 	"net/http"
@@ -28,24 +29,20 @@ type lineDataPreview struct {
 }
 
 func stampTypeURL(ldp *lineDataPreview) (*url.URL, error) {
-	switch lineStickerType(ldp) {
+	typ, err := ParseStickerType(ldp.Type)
+	if err != nil {
+		return nil, err
+	}
+	switch typ {
 	case LineStickerStatic:
 		return url.Parse(ldp.StaticURL)
 	case LineStickerAnimation:
 		return url.Parse(ldp.AnimationURL)
-	case LineStickerPopup:
-		return nil, errors.New("ポップアップスタンプには対応していません")
-	case LineStickerSound:
-		return nil, errors.New("ボイス・サウンド付きスタンプには対応していません")
-	case LineStickerAnimationSound:
-		return nil, errors.New("ボイス・サウンド付きスタンプには対応していません")
 	case LineStickerCustom:
 		return url.Parse(ldp.StaticURL)
-	case LineStickerUnkown:
-		return nil, errors.New("対応していません")
+	default:
+		return nil, fmt.Errorf("%sには対応していません", typ.Name())
 	}
-
-	return nil, errors.New("製作者に連絡してください")
 }
 
 // lineDataPreviews is a collection object for lineDataPreview
@@ -172,8 +169,11 @@ func download(ctx context.Context, ldp *lineDataPreview) (Encoder, error) {
 	}
 
 	defer resp.Body.Close()
-	lst := lineStickerType(ldp)
-	switch lst {
+	typ, err := ParseStickerType(ldp.Type)
+	if err != nil {
+		return nil, err
+	}
+	switch typ {
 	case LineStickerStatic, LineStickerCustom:
 		img, _, err := image.Decode(resp.Body)
 		if err != nil {
@@ -197,24 +197,5 @@ func download(ctx context.Context, ldp *lineDataPreview) (Encoder, error) {
 		}, nil
 	default:
 		return nil, errors.New("対応していません")
-	}
-}
-
-func lineStickerType(ldp *lineDataPreview) LineStickerType {
-	switch ldp.Type {
-	case "static":
-		return LineStickerStatic
-	case "animation":
-		return LineStickerAnimation
-	case "animation_sound":
-		return LineStickerAnimationSound
-	case "popup":
-		return LineStickerPopup
-	case "sound":
-		return LineStickerSound
-	case "name":
-		return LineStickerCustom
-	default:
-		return LineStickerUnkown
 	}
 }
