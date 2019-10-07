@@ -7,12 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"html"
-	"image"
 	"net/http"
 	"net/url"
 	"strings"
-
-	"github.com/kettek/apng"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -28,18 +25,18 @@ type lineDataPreview struct {
 	SoundURL          string `json:"soundUrl"`
 }
 
-func stampTypeURL(ldp *lineDataPreview) (*url.URL, error) {
-	typ, err := ParseStickerType(ldp.Type)
+func (p *lineDataPreview) URL() (*url.URL, error) {
+	typ, err := ParseStickerType(p.Type)
 	if err != nil {
 		return nil, err
 	}
 	switch typ {
 	case LineStickerStatic:
-		return url.Parse(ldp.StaticURL)
+		return url.Parse(p.StaticURL)
 	case LineStickerAnimation:
-		return url.Parse(ldp.AnimationURL)
+		return url.Parse(p.AnimationURL)
 	case LineStickerCustom:
-		return url.Parse(ldp.StaticURL)
+		return url.Parse(p.StaticURL)
 	default:
 		return nil, fmt.Errorf("%sには対応していません", typ.Name())
 	}
@@ -150,8 +147,8 @@ func downloadStamp(dps *lineDataPreviews) (*LineStamp, error) {
 	}, nil
 }
 
-func download(ctx context.Context, ldp *lineDataPreview) (Encoder, error) {
-	u, err := stampTypeURL(ldp)
+func download(ctx context.Context, ldp *lineDataPreview) (*FileEncoder, error) {
+	u, err := ldp.URL()
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +159,7 @@ func download(ctx context.Context, ldp *lineDataPreview) (Encoder, error) {
 	}
 
 	req = req.WithContext(ctx)
-	client := http.DefaultClient
-	resp, err := client.Do(req)
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -173,29 +169,9 @@ func download(ctx context.Context, ldp *lineDataPreview) (Encoder, error) {
 	if err != nil {
 		return nil, err
 	}
-	switch typ {
-	case LineStickerStatic, LineStickerCustom:
-		img, _, err := image.Decode(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		return &PNG{
-			name:  ldp.ID,
-			image: img,
-		}, nil
-
-	case LineStickerAnimation:
-		img, err := apng.DecodeAll(resp.Body)
-		if err != nil {
-			return nil, err
-		}
-
-		return &APNG{
-			name:  ldp.ID,
-			image: img,
-		}, nil
-	default:
-		return nil, errors.New("対応していません")
+	img, err := typ.Decode(resp.Body)
+	if err != nil {
+		return nil, err
 	}
+	return &FileEncoder{name: ldp.ID + ".png", img: img}, nil
 }

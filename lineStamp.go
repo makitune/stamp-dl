@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"io"
 	"strings"
 )
 
@@ -37,6 +38,38 @@ func ParseStickerType(s string) (LineStickerType, error) {
 
 func (t LineStickerType) Name() string {
 	return stickerNames[t]
+}
+
+func (t LineStickerType) Decode(r io.Reader) (EncoderTo, error) {
+	switch t {
+	case LineStickerStatic, LineStickerCustom:
+		var d PNGDecoder
+		return d.DecodeFrom(r)
+	case LineStickerAnimation:
+		var d APNGDecoder
+		return d.DecodeFrom(r)
+	default:
+		return nil, errors.New("対応していません")
+	}
+}
+
+type EncoderTo interface {
+	EncodeTo(w io.Writer) error
+}
+
+type FileEncoder struct {
+	name string
+	img  EncoderTo
+}
+
+// Encode implements the Encoder interface.
+func (f *FileEncoder) Encode(w io.Writer) error {
+	return f.img.EncodeTo(w)
+}
+
+// StoreName implements the Encoder interface.
+func (f *FileEncoder) StoreName() string {
+	return f.name
 }
 
 // LineStamp is a collection object for LineSticker
