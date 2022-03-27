@@ -2,15 +2,19 @@ package main
 
 import (
 	"errors"
-	"image"
-	"image/color"
-	"image/png"
+	"io"
 	"os"
 	"path/filepath"
 )
 
-// StoreStamp is a function that saves an input stamp to input dir
-func StoreStamp(s *LineStamp, dir string) error {
+// Encoder support writing to a file
+type Encoder interface {
+	Encode(w io.Writer) error
+	StoreName() string
+}
+
+// Store is a function that saves an input stamp to input dir
+func (s *LineStamp) Store(dir string) error {
 	info, err := os.Stat(dir)
 	if err != nil && !os.IsExist(err) || !info.IsDir() {
 		return errors.New(dir + " というディレクトリは存在しません。")
@@ -24,7 +28,7 @@ func StoreStamp(s *LineStamp, dir string) error {
 
 	for _, sticker := range s.Stickers {
 		absName := filepath.Join(outDir, sticker.StoreName())
-		err := writeFile(sticker.FilledBackgroundImage(color.RGBA{255, 255, 255, 255}), absName)
+		err := writeFile(sticker, absName)
 		if err != nil {
 			return err
 		}
@@ -33,7 +37,7 @@ func StoreStamp(s *LineStamp, dir string) error {
 	return nil
 }
 
-func writeFile(img image.Image, name string) error {
+func writeFile(encoder Encoder, name string) error {
 	info, err := os.Stat(name)
 	if err == nil && !info.IsDir() {
 		return errors.New(name + " が既に存在するため中断しました。")
@@ -45,7 +49,7 @@ func writeFile(img image.Image, name string) error {
 	}
 
 	defer f.Close()
-	err = png.Encode(f, img)
+	err = encoder.Encode(f)
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,7 @@ import (
 	"image/draw"
 )
 
-func fillBackground(img image.Image, clr color.Color) image.Image {
+func filledImage(img image.Image, clr color.Color) image.Image {
 	b := img.Bounds()
 
 	out := image.NewRGBA(b)
