@@ -6,14 +6,42 @@ LINE STORE から LINE スタンプの画像(.png)をダウンロードするた
 
 ## Download
 
-ターミナルで ↓ を実行 (どこからでも`stamp-dl`コマンドが使えるようになるはず...)
+ターミナルで ↓ を実行 (どこからでも`stamp-dl`コマンドが使えるようになるはず...)  
+Homebrew でのインストールか、手動でのインストールか、どちらか選んでね。
+
+### Homebrew
 
 ```console
-curl -o stamp-dl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.1.0/stamp-dl_v0.1.0_darwin_amd64'; chmod 755 stamp-dl; sudo mv stamp-dl /usr/local/bin/
+brew tap makitune/stamp-dl
+brew install stamp-dl
+```
+
+### Manual Install
+
+搭載されている CPU アーキテクチャによって、少し異なるので注意！  
+どちらにすべきかわからない場合は、ターミナルで ↓ を実行してみてね
+
+```console
+arch
+```
+
+#### Intel processors (amd64)
+
+```console
+curl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.1.0/stamp-dl-0.1.0.darwin_amd64.bottle.tar.gz' | tar xz; chmod 755 stamp-dl; sudo mv stamp-dl /usr/local/bin/
 ```
 
 実行するとパスワードを聞かれるので、Mac にログインするときに使うパスワードを入力する。  
-成功すると`/usr/local/bin`にバイナリが配置される。(削除する時はココを探して！)
+成功すると`/usr/local/bin/`にバイナリが配置される。(削除する時はココを探して！)
+
+#### Apple silicon (arm64)
+
+```console
+curl -L 'https://github.com/makitune/stamp-dl/releases/download/v0.1.0/stamp-dl-0.1.0.darwin_arm64.bottle.tar.gz' | tar xz; chmod 755 stamp-dl; sudo mv stamp-dl /opt/homebrew/bin/
+```
+
+実行するとパスワードを聞かれるので、Mac にログインするときに使うパスワードを入力する。  
+成功すると`/opt/homebrew/bin/`にバイナリが配置される。(削除する時はココを探して！)
 
 ## Usage
 
